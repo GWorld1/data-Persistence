@@ -4,24 +4,26 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class MainManager : MonoBehaviour
+public  class MainManager : MonoBehaviour
 {
+
+    
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
-
     public Text ScoreText;
+    public Text Scoretext;
     public GameObject GameOverText;
-    
+    public int finalScore;
     private bool m_Started = false;
     private int m_Points;
-    
     private bool m_GameOver = false;
 
-    
+   
     // Start is called before the first frame update
     void Start()
     {
+        Scoretext.text = SaveData.save.bestScore;
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -34,10 +36,11 @@ public class MainManager : MonoBehaviour
                 var brick = Instantiate(BrickPrefab, position, Quaternion.identity);
                 brick.PointValue = pointCountArray[i];
                 brick.onDestroyed.AddListener(AddPoint);
+                
             }
         }
     }
-
+    
     private void Update()
     {
         if (!m_Started)
@@ -55,6 +58,7 @@ public class MainManager : MonoBehaviour
         }
         else if (m_GameOver)
         {
+             
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -70,7 +74,24 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
+        finalScore = m_Points;
+        if (m_Points>SaveData.save.highscore)
+        {
+            SaveData.save.highscore = finalScore;
+            SaveData.save.Name = SaveData.save.UserName;
+            SaveData.save.SaveUserData();
+            Scoretext.text = SaveData.save.Name + ":BestScore:" + SaveData.save.highscore;
+        }
+       
         m_GameOver = true;
         GameOverText.SetActive(true);
+    }
+   
+  
+    public void loadMenu()
+    {
+        SceneManager.LoadScene(0);
+        GameOverText.SetActive(false);
+        m_GameOver = false;
     }
 }
